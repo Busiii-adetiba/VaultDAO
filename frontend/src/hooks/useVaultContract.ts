@@ -846,47 +846,6 @@ return { totalBalance: balance, totalProposals, pendingApprovals, readyToExecute
             'Adding a signer requires a governance proposal (update_config_signers). ' +
             'Please use the Admin Panel to raise a config-change proposal.'
         );
-    /**
-     * The contract has no direct `add_signer`; signer changes go through
-     * governance. This submits a `propose_vault_config_change` proposal with
-     * the current on-chain config plus the new signer. The signer is added once
-     * that proposal is approved and executed.
-     */
-    const addSigner = async (signer: string) => {
-        const _addr = assertReady();
-        setLoading(true);
-        try {
-            const account = await server.getAccount(_addr);
-            const tx = (await newTransactionBuilder(account))
-                .addOperation(Operation.invokeHostFunction({
-                    func: xdr.HostFunction.hostFunctionTypeInvokeContract(
-                        new xdr.InvokeContractArgs({
-                            contractAddress: Address.fromString(env.contractId).toScAddress(),
-                            functionName: "add_signer",
-                            args: [new Address(_addr).toScVal(), new Address(signer).toScVal()],
-                        })
-                    ),
-                    auth: [],
-                }))
-                .build();
-            const simulation = await server.simulateTransaction(tx);
-            if (SorobanRpc.Api.isSimulationError(simulation)) throwSimulationError(simulation.error, "Simulation failed");
-            const preparedTx = SorobanRpc.assembleTransaction(tx, simulation).build();
-            const signedXdr = await signTransaction(preparedTx.toXDR(), { network: env.stellarNetwork });
-            const response = await server.sendTransaction(TransactionBuilder.fromXDR(signedXdr as string, env.networkPassphrase));
-            return response.hash;
-            const currentConfig = await readContractScVal('get_config');
-            if (!currentConfig) throw new Error('Unable to load current vault config');
-            const newConfig = buildConfigWithAddedSigner(currentConfig, new Address(signer).toScVal());
-            return await invokeContract('propose_vault_config_change', [
-                new Address(_addr).toScVal(),
-                newConfig,
-            ]);
-        } catch (e: unknown) {
-            throw parseError(e);
-        } finally {
-            setLoading(false);
-        }
     };
 
     const removeSigner = async (signer: string) => {

@@ -257,7 +257,7 @@ const KNOWN_CONTRACT_FUNCTIONS = new Set<string>([
   'get_var_template',
   'get_vault_namespace',
   'get_vesting_schedule',
-  'get_vesting_schedules_by_beneficiary',
+  'get_vesting_by_beneficiary',
   'get_voting_power',
   'get_voting_strategy',
   'get_weekly_spent',

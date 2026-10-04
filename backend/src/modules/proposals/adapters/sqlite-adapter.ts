@@ -243,9 +243,9 @@ export class SqliteProposalActivityAdapter implements SyncProposalActivityPersis
   /**
    * Aggregate activity counts for a proposal.
    */
-  getSummary(proposalId: string): ProposalActivitySyncSummary | undefined {
+  getSummary(proposalId: string): ProposalActivitySyncSummary | null {
     const row = this.stmtSummary.get(proposalId) as any;
-    if (!row) return undefined;
+    if (!row) return null;
 
     return {
       proposalId: row.proposalId,

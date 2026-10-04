@@ -150,7 +150,7 @@ Using the schedule from §2, the Admin cancels at day 180 (ledger `5,110,400`) a
 
 Read-only. Returns `None` for an unknown id.
 
-### `get_vesting_schedules_by_beneficiary(beneficiary: Address, offset: u32, limit: u32) -> Vec<VestingSchedule>`
+### `get_vesting_by_beneficiary(beneficiary: Address, offset: u32, limit: u32) -> Vec<VestingSchedule>`
 
 Read-only. Lists the schedules created for `beneficiary` in creation order, so a
 beneficiary or UI can enumerate its own schedules without guessing ids.

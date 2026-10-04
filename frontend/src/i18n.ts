@@ -18,7 +18,7 @@ export function normalizeLanguage(lng: string): string {
   if (exact) return exact;
   if (TRADITIONAL_CHINESE.test(lng)) return 'zh-TW';
   return lng.split(/[-_]/)[0];
-export const SUPPORTED_LANGUAGES = ['en', 'es', 'fr', 'ar', 'zh', 'zh-TW'];
+}
 
 /**
  * Map a detected language tag to a supported one. Region-specific locales we
@@ -26,8 +26,7 @@ export const SUPPORTED_LANGUAGES = ['en', 'es', 'fr', 'ar', 'zh', 'zh-TW'];
  * language (en-US -> en).
  */
 export function normalizeDetectedLanguage(lng: string): string {
-  if (SUPPORTED_LANGUAGES.includes(lng)) return lng;
-  return lng.split('-')[0];
+  return normalizeLanguage(lng);
 }
 
 // Configure i18next to lazily load translations from /locales/{{lng}}/{{ns}}.json
@@ -38,7 +37,6 @@ i18n
   .init({
     fallbackLng: 'en',
     supportedLngs: [...SUPPORTED_LANGUAGES],
-    supportedLngs: SUPPORTED_LANGUAGES,
     ns: ['translation'],
     defaultNS: 'translation',
     debug: false,
@@ -57,7 +55,6 @@ i18n
       caches: ['localStorage'],
       lookupLocalStorage: 'i18nextLng',
       convertDetectedLanguage: normalizeLanguage,
-      convertDetectedLanguage: normalizeDetectedLanguage,
     },
   });
 

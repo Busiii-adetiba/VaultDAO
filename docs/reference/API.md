@@ -841,7 +841,7 @@ Fetch a vesting schedule by ID (read-only).
 
 **Returns:** `VestingSchedule { id, beneficiary, token, total, cliff_ledger, start_ledger, end_ledger, claimed, cancelled }`, or `None`
 
-### `get_vesting_schedules_by_beneficiary(beneficiary: Address, offset: u32, limit: u32) -> Vec<VestingSchedule>`
+### `get_vesting_by_beneficiary(beneficiary: Address, offset: u32, limit: u32) -> Vec<VestingSchedule>`
 
 List the vesting schedules created for a beneficiary, in creation order (read-only).
 

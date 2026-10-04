@@ -14,7 +14,10 @@ export function getContractsController(
 ): RequestHandler {
   return (_req, res) => {
     if (poller) {
-      registry.setLastIndexedLedger(poller.getStatus().lastLedgerPolled);
+      const ledger = poller.getStatus().lastLedgerPolled;
+      for (const contract of registry.list()) {
+        registry.updateLastLedger(contract.id, ledger);
+      }
     }
     const list = registry.list();
     res.status(200).json({ success: true, data: list });

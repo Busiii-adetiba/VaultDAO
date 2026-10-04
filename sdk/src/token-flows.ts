@@ -203,7 +203,7 @@ export async function getVestingSchedulesByBeneficiary(
   if (offset < 0) throw new Error("Vesting schedule offset must be non-negative");
   if (limit < 0) throw new Error("Vesting schedule limit must be non-negative");
   const op = getContract(opts).call(
-    "get_vesting_schedules_by_beneficiary",
+    "get_vesting_by_beneficiary",
     addressToScVal(beneficiary),
     u32ToScVal(offset),
     u32ToScVal(limit)

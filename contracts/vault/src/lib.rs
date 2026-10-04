@@ -17934,7 +17934,7 @@ impl VaultDAO {
     /// * `offset`      - Number of schedules to skip (use 0 for the first page).
     /// * `limit`       - Maximum number of schedules to return (0 or above 50
     ///                   returns up to 50).
-    pub fn get_vesting_schedules_by_beneficiary(
+    pub fn get_vesting_by_beneficiary(
         env: Env,
         beneficiary: Address,
         offset: u32,
@@ -17965,7 +17965,7 @@ impl VaultDAO {
     /// List vesting schedule IDs in ascending ID order, paginated.
     ///
     /// The counter-reading counterpart of
-    /// `get_vesting_schedules_by_beneficiary`, for UIs that page through every
+    /// `get_vesting_by_beneficiary`, for UIs that page through every
     /// schedule in the vault rather than one beneficiary's.
     ///
     /// # Arguments

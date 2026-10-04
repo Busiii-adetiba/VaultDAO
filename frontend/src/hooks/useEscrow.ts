@@ -298,24 +298,6 @@ export function useEscrow(): UseEscrowReturn {
           loaded.push(mapContractEscrow(r.value as ContractEscrow, latestLedger));
         } else if (r.status === 'rejected') {
           console.warn(`useEscrow: failed to load escrow ${ids[i]}`, r.reason);
-      // Attempt to fetch from Soroban events
-      const { events } = await fetchContractEvents({
-        lookbackLedgers: 100_000,
-        signal: controller.signal,
-      });
-      if (controller.signal.aborted) return;
-
-      // Filter escrow-related events
-      const escrowEvents = events.filter((ev) => {
-        const topic0 = ev.topic?.[0];
-        if (!topic0) return false;
-        try {
-          const { scValToNative } = require('@stellar/stellar-sdk');
-          const scv = xdr.ScVal.fromXDR(topic0, 'base64');
-          const native = scValToNative(scv);
-          return typeof native === 'string' && native.startsWith('escrow');
-        } catch {
-          return false;
         }
       });
 
