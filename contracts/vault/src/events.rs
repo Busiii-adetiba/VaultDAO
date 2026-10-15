@@ -2111,6 +2111,20 @@ pub fn emit_proposal_auto_cancelled_limit_exceeded(
     );
 }
 
+/// Emit a summary of a batch auto-cancellation of proposals.
+///
+/// Published once per batch so indexers can observe the full set of proposals
+/// that were cancelled together, along with the total count.
+///
+/// Topics: `("proposals_auto_cancelled",)`
+/// Data:   `(cancelled_ids, count)`
+pub fn emit_proposals_auto_cancelled_summary(env: &Env, cancelled_ids: Vec<u64>, count: u32) {
+    env.events().publish(
+        (Symbol::new(env, "proposals_auto_cancelled"),),
+        (cancelled_ids, count),
+    );
+}
+
 /// Emit when a signer's rolling participation rate has stayed below
 /// `Config.min_participation_rate` for `Config.low_participation_consecutive_proposals`
 /// proposals in a row (Issue #1093).
