@@ -706,6 +706,8 @@ pub struct Proposal {
     /// Ledger when the proposal was approved (0 = not yet approved).
     /// Used to enforce the execution window (Issue #1349).
     pub approved_at: u64,
+    /// Addresses that have voted to reject this proposal
+    pub rejection_votes: Vec<Address>,
 }
 
 /// Represents a grouped batch of proposals for atomic execution.

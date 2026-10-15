@@ -506,6 +506,14 @@ pub enum VaultError {
     // Issue #1748: Storage schema versioning
     /// Stored schema version does not match this contract build; call `migrate`
     SchemaVersionMismatch = 1140,
+
+    // =========================================================
+    // Rejection voting
+    // =========================================================
+    /// A reject vote was recorded but the rejection threshold has not been met
+    RejectionThresholdNotReached = 1141,
+    /// Signer has already rejected this proposal
+    AlreadyRejected = 1142,
 }
 
 // Compatibility markers for CI source checks:
