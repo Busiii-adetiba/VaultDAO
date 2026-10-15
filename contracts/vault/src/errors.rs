@@ -506,6 +506,12 @@ pub enum VaultError {
     // Issue #1748: Storage schema versioning
     /// Stored schema version does not match this contract build; call `migrate`
     SchemaVersionMismatch = 1140,
+
+    // =========================================================
+    // Per-proposer pending reservation cap
+    // =========================================================
+    /// A single proposer's pending reservations would exceed the per-proposer cap
+    ExceedsProposerPendingLimit = 1141,
 }
 
 // Compatibility markers for CI source checks:
