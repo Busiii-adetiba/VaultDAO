@@ -202,6 +202,8 @@ mod test_pause_and_governed_withdrawals;
 #[cfg(test)]
 mod test_pause_circuit_breaker;
 #[cfg(test)]
+mod test_pending_reservations;
+#[cfg(test)]
 mod test_proposal_expiration;
 #[cfg(test)]
 mod test_proposal_management;

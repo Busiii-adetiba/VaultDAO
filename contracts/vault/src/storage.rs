@@ -1879,6 +1879,55 @@ pub fn refund_spending_limits(env: &Env, amount: i128, spend_day: u64, spend_wee
     try_deduct_daily_spent(env, spend_day, amount);
     try_deduct_weekly_spent(env, spend_week, amount);
 }
+
+/// Commit a proposal's reserved spend from the pending counters into the
+/// executed counters.
+///
+/// On successful execution the amount that was reserved against the pending
+/// daily/weekly (and per-token) buckets must be moved into the executed
+/// buckets so that reporting reflects actual spend, while the pending
+/// counters are decremented by the same amount.
+///
+/// The pending counters are decremented using the atomic `try_deduct_*`
+/// helpers so they can never underflow, and the executed counters are
+/// credited via the corresponding `add_*` helpers.
+pub fn commit_pending_to_executed(env: &Env, proposal: &Proposal) {
+    let amount = proposal.amount;
+    if amount <= 0 {
+        return;
+    }
+
+    let spend_day = proposal.spend_day;
+    let spend_week = proposal.spend_week;
+
+    // Move global daily/weekly pending spend into executed spend.
+    try_deduct_daily_spent(env, spend_day, amount);
+    try_deduct_weekly_spent(env, spend_week, amount);
+    add_daily_spent(env, spend_day, amount);
+    add_weekly_spent(env, spend_week, amount);
+
+    // Move per-token pending spend into executed spend when a token is set.
+    if let Some(token) = proposal.token.clone() {
+        let current_daily = get_token_daily_spent(env, &token, spend_day);
+        let refunded_daily = current_daily.saturating_sub(amount).max(0);
+        let key_daily = DataKey::TokenDailySpent(token.clone(), spend_day);
+        env.storage().temporary().set(&key_daily, &refunded_daily);
+        env.storage()
+            .temporary()
+            .extend_ttl(&key_daily, DAY_IN_LEDGERS * 2, DAY_IN_LEDGERS * 2);
+
+        let current_weekly = get_token_weekly_spent(env, &token, spend_week);
+        let refunded_weekly = current_weekly.saturating_sub(amount).max(0);
+        let key_weekly = DataKey::TokenWeeklySpent(token.clone(), spend_week);
+        env.storage().temporary().set(&key_weekly, &refunded_weekly);
+        env.storage()
+            .temporary()
+            .extend_ttl(&key_weekly, DAY_IN_LEDGERS * 14, DAY_IN_LEDGERS * 14);
+
+        add_token_daily_spent(env, &token, spend_day, amount);
+        add_token_weekly_spent(env, &token, spend_week, amount);
+    }
+}
 // ============================================================================
 // Comments
 // ============================================================================
