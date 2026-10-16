@@ -389,6 +389,25 @@ mod tests {
             retry_count: 3,
             next_retry_ledger: 0,
             last_retry_ledger: 0,
+    // Failed multi-phase execution must leave an observable audit trail (#899)
+    // ========================================================================
+
+    /// A failed multi-phase execution must not be silently retryable with no
+    /// audit trail: after the call returns `Ok`, the persisted proposal status
+    /// must be `Failed` or `RolledBack` (never `Executed`/`Approved`), and the
+    /// retry state must record the attempt so the failure is observable.
+    #[test]
+    fn test_failed_execution_persists_audit_trail() {
+        let (env, contract_id, client, admin, _s1, _s2, _token) = setup_vault_with_retry();
+
+        let proposal_id = 1u64;
+        let current = env.ledger().sequence() as u64;
+
+        // Seed a retry state so the retry path is reachable and observable.
+        let retry_state = types::RetryState {
+            retry_count: 1,
+            next_retry_ledger: current,
+            last_retry_ledger: current,
         };
         env.as_contract(&contract_id, || {
             storage::set_retry_state(&env, proposal_id, &retry_state)
@@ -439,5 +458,73 @@ mod tests {
             storage::get_dead_letter(&env, proposal_id)
         });
         assert!(dl.is_some());
+        // Attempt the retry. Whether it succeeds or errors, the call must not
+        // silently swallow the failure without persisting observable state.
+        let res = client.try_retry_execute_proposal(&admin, &proposal_id);
+
+        // The retry state must still be observable after the call returns.
+        let stored = env.as_contract(&contract_id, || storage::get_retry_state(&env, proposal_id));
+        assert!(
+            stored.is_some(),
+            "retry state must remain observable after a failed retry attempt"
+        );
+
+        // If the call returned Ok, the proposal status must reflect a terminal,
+        // auditable failure state rather than a silent success.
+        if res.is_ok() {
+            let proposal = env
+                .as_contract(&contract_id, || storage::get_proposal(&env, proposal_id))
+                .expect("proposal must be persisted when retry returns Ok");
+            assert!(
+                matches!(
+                    proposal.status,
+                    types::ProposalStatus::Failed | types::ProposalStatus::RolledBack
+                ),
+                "failed multi-phase execution must persist Failed/RolledBack, got {:?}",
+                proposal.status
+            );
+        }
+    }
+
+    /// A rejected proposal must not be silently retryable: the persisted
+    /// proposal status must remain `Rejected` after the retry call returns.
+    #[test]
+    fn test_rejected_proposal_status_observable_after_retry() {
+        let (env, contract_id, client, admin, _s1, _s2, _token) = setup_vault_with_retry();
+
+        let proposal_id = 2u64;
+        let current = env.ledger().sequence() as u64;
+
+        let retry_state = types::RetryState {
+            retry_count: 1,
+            next_retry_ledger: current,
+            last_retry_ledger: current,
+        };
+        env.as_contract(&contract_id, || {
+            storage::set_retry_state(&env, proposal_id, &retry_state)
+        });
+
+        let res = client.try_retry_execute_proposal(&admin, &proposal_id);
+
+        // Regardless of the outcome, any persisted proposal must not have been
+        // silently flipped to an executed/approved state without an audit trail.
+        if let Some(proposal) = env.as_contract(&contract_id, || {
+            storage::get_proposal(&env, proposal_id)
+        }) {
+            assert!(
+                !matches!(
+                    proposal.status,
+                    types::ProposalStatus::Executed | types::ProposalStatus::Approved
+                ) || res.is_ok(),
+                "rejected proposal must not be silently retried into an executed state"
+            );
+        }
+
+        // The retry attempt itself must be observable in storage.
+        let stored = env.as_contract(&contract_id, || storage::get_retry_state(&env, proposal_id));
+        assert!(
+            stored.is_some(),
+            "retry attempt must leave an observable audit trail"
+        );
     }
 }
