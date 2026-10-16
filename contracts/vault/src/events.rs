@@ -184,6 +184,28 @@ pub fn emit_proposal_rejected(env: &Env, proposal_id: u64, rejector: &Address, p
     );
 }
 
+/// Emit when a signer casts a rejection vote, tracking progress toward the
+/// rejection threshold.
+///
+/// Topics: `("proposal_rejection_vote", proposal_id)`
+/// Data:   `(voter, rejection_vote_count, required_threshold)`
+///
+/// `rejection_vote_count` is the cumulative number of rejection votes recorded
+/// for the proposal after this vote; `required_threshold` is the number of
+/// rejection votes needed to reject the proposal outright.
+pub fn emit_proposal_rejection_vote(
+    env: &Env,
+    proposal_id: u64,
+    voter: &Address,
+    rejection_vote_count: u32,
+    required_threshold: u32,
+) {
+    env.events().publish(
+        (Symbol::new(env, "proposal_rejection_vote"), proposal_id),
+        (voter.clone(), rejection_vote_count, required_threshold),
+    );
+}
+
 /// Emit when a signer explicitly rejects a proposal via `reject_proposal` (Issue #1522).
 ///
 /// Published under the same `proposal_rejected` topic as `emit_proposal_rejected` since

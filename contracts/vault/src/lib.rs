@@ -1057,6 +1057,7 @@ impl VaultDAO {
             spend_week: storage::get_week_number(&env),
             has_spend_buckets: true,
             approved_at: 0,
+            rejection_votes: Vec::new(&env),
         };
 
         storage::set_proposal(&env, &proposal);
@@ -1360,6 +1361,7 @@ impl VaultDAO {
                 spend_week: storage::get_week_number(&env),
                 has_spend_buckets: true,
                 approved_at: 0,
+                rejection_votes: Vec::new(&env),
             };
 
             storage::set_proposal(&env, &proposal);
@@ -3779,6 +3781,7 @@ impl VaultDAO {
             spend_week: storage::get_week_number(&env),
             has_spend_buckets: true,
             approved_at: 0,
+            rejection_votes: Vec::new(&env),
         };
 
         storage::set_proposal(&env, &proposal);
@@ -4630,6 +4633,7 @@ impl VaultDAO {
             spend_week: storage::get_week_number(env),
             has_spend_buckets: true,
             approved_at: 0,
+            rejection_votes: Vec::new(env),
         };
 
         storage::set_proposal(env, &proposal);
@@ -9900,6 +9904,7 @@ impl VaultDAO {
             spend_week: storage::get_week_number(&env),
             has_spend_buckets: true,
             approved_at: 0,
+            rejection_votes: Vec::new(&env),
         };
 
         storage::set_proposal(&env, &proposal);
@@ -11815,6 +11820,7 @@ impl VaultDAO {
             spend_week: storage::get_week_number(&env),
             has_spend_buckets: true,
             approved_at: 0,
+            rejection_votes: Vec::new(&env),
         };
 
         storage::set_proposal(&env, &proposal);
@@ -13207,6 +13213,7 @@ impl VaultDAO {
             spend_week: storage::get_week_number(&env),
             has_spend_buckets: true,
             approved_at: 0,
+            rejection_votes: Vec::new(&env),
         };
 
         storage::set_proposal(&env, &proposal);
@@ -15797,6 +15804,7 @@ impl VaultDAO {
             spend_week: storage::get_week_number(&env),
             has_spend_buckets: true,
             approved_at: 0,
+            rejection_votes: Vec::new(&env),
         };
 
         storage::set_proposal(&env, &proposal);
@@ -16779,6 +16787,7 @@ impl VaultDAO {
             spend_week: storage::get_week_number(&env),
             has_spend_buckets: true,
             approved_at: 0,
+            rejection_votes: Vec::new(&env),
         };
 
         storage::set_proposal(&env, &proposal);
@@ -17047,6 +17056,7 @@ impl VaultDAO {
             spend_week: storage::get_week_number(&env),
             has_spend_buckets: true,
             approved_at: 0,
+            rejection_votes: Vec::new(&env),
         };
 
         storage::set_proposal(&env, &proposal);
@@ -17302,6 +17312,7 @@ impl VaultDAO {
             spend_week: storage::get_week_number(&env),
             has_spend_buckets: true,
             approved_at: 0,
+            rejection_votes: Vec::new(&env),
         };
 
         storage::set_proposal(&env, &new_proposal);
@@ -17473,6 +17484,7 @@ impl VaultDAO {
             spend_week: storage::get_week_number(&env),
             has_spend_buckets: true,
             approved_at: 0,
+            rejection_votes: Vec::new(&env),
         };
         storage::set_proposal(&env, &new_proposal);
 

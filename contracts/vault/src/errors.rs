@@ -508,6 +508,12 @@ pub enum VaultError {
     SchemaVersionMismatch = 1140,
 
     // =========================================================
+    // Rejection voting
+    // =========================================================
+    /// A reject vote was recorded but the rejection threshold has not been met
+    RejectionThresholdNotReached = 1141,
+    /// Signer has already rejected this proposal
+    AlreadyRejected = 1142,
     // Per-proposer pending reservation cap
     // =========================================================
     /// A single proposer's pending reservations would exceed the per-proposer cap
