@@ -18767,10 +18767,23 @@ impl VaultDAO {
     // Issue #1353: Spending Limit Recalculation on Config Update
     // ========================================================================
 
-    /// Validate pending proposals for spending limit violations (Admin only)
+    /// Validate pending proposals for spending limit violations (Admin only).
+    ///
+    /// Scans a bounded window of proposals starting at `start_id` (clamped to at
+    /// least 1) and inspects at most `max_count` proposals, so the caller can
+    /// page through large proposal sets without exceeding the compute budget.
+    ///
+    /// When `auto_cancel` is true, any pending proposal whose amount exceeds the
+    /// current `spending_limit` is cancelled via `cancel_proposal_internal` using
+    /// the admin as the canceller and an `exceeds_new_limit` reason. A summary
+    /// event lists the cancelled proposal IDs.
+    ///
+    /// Returns the number of proposals cancelled.
     pub fn validate_limits_pending(
         env: Env,
         admin: Address,
+        start_id: u64,
+        max_count: u32,
         auto_cancel: bool,
     ) -> Result<u32, VaultError> {
         admin.require_auth();
@@ -18781,23 +18794,35 @@ impl VaultDAO {
 
         let config = storage::get_config(&env)?;
         let mut cancelled_count: u32 = 0;
+        let mut cancelled_ids: Vec<u64> = Vec::new(&env);
 
         // Get the next proposal ID to know upper bound
         let next_id = storage::get_next_proposal_id(&env);
 
-        // Iterate through all proposals (gas-intensive, but comprehensive)
-        // In production, consider maintaining a separate pending proposals list
-        for proposal_id in 0..next_id {
+        // Iterate through a bounded window of proposals starting at start_id.
+        let first_id = start_id.max(1);
+        let mut proposal_id = first_id;
+        let mut inspected: u32 = 0;
+
+        while proposal_id < next_id && inspected < max_count {
+            inspected += 1;
+
             if let Ok(proposal) = storage::get_proposal(&env, proposal_id) {
                 if proposal.status == ProposalStatus::Pending {
                     // Check if proposal exceeds current spending limit
                     if proposal.amount > config.spending_limit {
                         if auto_cancel {
-                            // Auto-cancel the proposal
-                            let mut p = proposal.clone();
-                            p.status = ProposalStatus::Cancelled;
-                            storage::set_proposal(&env, &p);
+                            // Auto-cancel the proposal through the shared
+                            // cancellation path so refunds, records, and events
+                            // stay consistent with a normal cancellation.
+                            Self::cancel_proposal_internal(
+                                &env,
+                                &admin,
+                                proposal_id,
+                                Symbol::new(&env, "exceeds_new_limit"),
+                            )?;
                             cancelled_count += 1;
+                            cancelled_ids.push_back(proposal_id);
 
                             events::emit_proposal_auto_cancelled_limit_exceeded(
                                 &env,
@@ -18818,6 +18843,12 @@ impl VaultDAO {
                     }
                 }
             }
+
+            proposal_id += 1;
+        }
+
+        if !cancelled_ids.is_empty() {
+            events::emit_limits_pending_summary(&env, &admin, &cancelled_ids, cancelled_count);
         }
 
         Ok(cancelled_count)
