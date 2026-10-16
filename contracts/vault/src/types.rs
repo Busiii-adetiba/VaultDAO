@@ -1399,6 +1399,10 @@ pub enum AuditAction {
     PoolWithdrawn = 27,
     /// Collected fees withdrawn directly by an Admin (within the spending limit).
     FeesWithdrawn = 28,
+    /// A single phase of a multi-phase proposal executed successfully.
+    PhaseExecuted = 29,
+    /// A single phase of a multi-phase proposal failed to execute.
+    PhaseFailed = 30,
 }
 
 /// Audit trail entry with cryptographic verification

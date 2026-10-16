@@ -2438,6 +2438,44 @@ pub fn emit_vesting_cancelled(
 }
 
 // ============================================================================
+// Phase Execution Events
+// ============================================================================
+
+/// Emit when a proposal phase executes successfully.
+///
+/// Topics: `("phase_executed", proposal_id)`
+/// Data:   `(phase_index, status, error_code)`
+pub fn emit_phase_executed(
+    env: &Env,
+    proposal_id: u64,
+    phase_index: u32,
+    status: u32,
+    error_code: u32,
+) {
+    env.events().publish(
+        (Symbol::new(env, "phase_executed"), proposal_id),
+        (phase_index, status, error_code),
+    );
+}
+
+/// Emit when a proposal phase fails.
+///
+/// Topics: `("phase_failed", proposal_id)`
+/// Data:   `(phase_index, status, error_code)`
+pub fn emit_phase_failed(
+    env: &Env,
+    proposal_id: u64,
+    phase_index: u32,
+    status: u32,
+    error_code: u32,
+) {
+    env.events().publish(
+        (Symbol::new(env, "phase_failed"), proposal_id),
+        (phase_index, status, error_code),
+    );
+}
+
+// ============================================================================
 // Governed pool and fee withdrawals
 // ============================================================================
 
