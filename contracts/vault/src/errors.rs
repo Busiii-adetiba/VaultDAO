@@ -514,6 +514,10 @@ pub enum VaultError {
     RejectionThresholdNotReached = 1141,
     /// Signer has already rejected this proposal
     AlreadyRejected = 1142,
+    // Per-proposer pending reservation cap
+    // =========================================================
+    /// A single proposer's pending reservations would exceed the per-proposer cap
+    ExceedsProposerPendingLimit = 1141,
 }
 
 // Compatibility markers for CI source checks:

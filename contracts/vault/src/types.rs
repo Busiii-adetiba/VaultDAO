@@ -1401,6 +1401,10 @@ pub enum AuditAction {
     PoolWithdrawn = 27,
     /// Collected fees withdrawn directly by an Admin (within the spending limit).
     FeesWithdrawn = 28,
+    /// A single phase of a multi-phase proposal executed successfully.
+    PhaseExecuted = 29,
+    /// A single phase of a multi-phase proposal failed to execute.
+    PhaseFailed = 30,
 }
 
 /// Audit trail entry with cryptographic verification
@@ -3129,6 +3133,30 @@ pub struct HookRegistration {
     /// Maximum fee in stroops the vault will pay the keeper per successful call.
     /// Set to 0 to disable fee payment.
     pub max_fee: i128,
+}
+
+// ============================================================================
+// Pending Reservation Exposure
+// ============================================================================
+
+/// Snapshot of spending that has been reserved by pending proposals but not
+/// yet executed, broken down by time bucket and token.
+///
+/// Reservations are recorded when a proposal is created (see `spend_day` /
+/// `spend_week` on [`Proposal`]) so that the daily/weekly limits account for
+/// in-flight proposals. This struct exposes those reservations so callers can
+/// see how much of each limit is already committed.
+#[contracttype]
+#[derive(Clone, Debug)]
+pub struct PendingReserved {
+    /// Total amount reserved against the daily limit across all tokens.
+    pub daily: i128,
+    /// Total amount reserved against the weekly limit across all tokens.
+    pub weekly: i128,
+    /// Per-token reserved amounts, keyed by token address.
+    pub per_token: Map<Address, i128>,
+    /// Per-proposer reserved amounts, keyed by proposer address.
+    pub per_proposer: Map<Address, i128>,
 }
 
 // ============================================================================
